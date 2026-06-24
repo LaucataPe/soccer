@@ -146,8 +146,8 @@
   .today-hint { font-size: 0.62rem; color: var(--teal); text-align: center; margin-top: 8px; font-weight: 600; }
   .today-loading { color: var(--muted); font-size: 0.82rem; padding: 12px 0; }
   .today-empty { color: var(--muted); font-size: 0.82rem; text-align: center; padding: 12px 0; width: 100%; }
-  .heatmap-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 16px; overflow-x: auto; box-shadow: 0 1px 4px rgba(17,24,63,0.05); }
-  .heatmap-wrap { display: flex; justify-content: center; }
+  .heatmap-panel { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; margin-bottom: 16px; box-shadow: 0 1px 4px rgba(17,24,63,0.05); }
+  .heatmap-wrap { display: flex; justify-content: center; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: thin; scrollbar-color: var(--teal) transparent; }
   @media (max-width: 600px) {
     .selector-card { grid-template-columns: 1fr; }
     .two-col { grid-template-columns: 1fr; }
@@ -163,6 +163,7 @@
     .today-name { font-size: 0.7rem; }
     .header-mascot { width: 48px; height: 48px; }
     .logo { font-size: 1.8rem; }
+    .heatmap-wrap { justify-content: flex-start; }
   }
 </style>
 </head>
@@ -181,6 +182,7 @@
     <div class="today-header">
       <span class="today-m26">M26</span>
       <span class="today-header-title">Partidos de hoy</span>
+      <span style="font-size:0.68rem;color:var(--muted);background:var(--card);border:1px solid var(--border);border-radius:8px;padding:2px 7px;font-weight:600">🕐 Hora COL</span>
       <span class="today-date-badge" id="todayDateBadge"></span>
     </div>
     <div class="today-scroll" id="todayMatches">
@@ -327,7 +329,7 @@ function calcPrediction(homeTeam, awayTeam, neutral) {
     if(h>a)winH+=p; else if(h===a)draw+=p; else winA+=p;
   }
   scores.sort((a,b)=>b.p-a.p);
-  return {winH:Math.round(winH*100),draw:Math.round(draw*100),winA:Math.round(winA*100),topScores:scores.slice(0,8),best:scores[0],eloH,eloA,eloDiff:Math.round(eloDiff),allScores:scores};
+  return {winHome:Math.round(winH*100),draw:Math.round(draw*100),winAway:Math.round(winA*100),topScores:scores.slice(0,8),best:scores[0],eloH,eloA,eloDiff:Math.round(eloDiff),allScores:scores};
 }
 
 function runPredict() {
@@ -427,7 +429,7 @@ function renderHeatmap(allScores, home, away) {
   <text x="${lgX}" y="${lgY+lgH+12}" font-size="10" fill="#8890b0" font-family="-apple-system,system-ui,sans-serif">0%</text>
   <text x="${lgX+lgW}" y="${lgY+lgH+12}" text-anchor="end" font-size="10" fill="#8890b0" font-family="-apple-system,system-ui,sans-serif">más probable</text>`;
 
-  const svg = `<svg width="${svgW}" height="${svgH}" style="max-width:100%;height:auto" xmlns="http://www.w3.org/2000/svg">${legend}${axes}${cells}</svg>`;
+  const svg = `<svg width="${svgW}" height="${svgH}" style="display:block" xmlns="http://www.w3.org/2000/svg">${legend}${axes}${cells}</svg>`;
   document.getElementById('heatmapContainer').innerHTML = svg;
 }
 
@@ -510,6 +512,15 @@ function teamColor(name) {
   return palette[h%palette.length];
 }
 
+function toColombiaTime(raw) {
+  if (!raw) return '';
+  const m = raw.match(/(\d{1,2}):(\d{2})\s*UTC([+-]\d+)/);
+  if (!m) return raw.replace(/\s*UTC.*/, '');
+  let h = parseInt(m[1]), min = parseInt(m[2]), off = parseInt(m[3]);
+  h = ((h - off - 5) % 24 + 24) % 24;
+  return String(h).padStart(2,'0') + ':' + String(min).padStart(2,'0');
+}
+
 function renderTodayCards(matches) {
   const el = document.getElementById('todayMatches');
   if(!matches.length) {
@@ -518,7 +529,7 @@ function renderTodayCards(matches) {
   }
   el.innerHTML = matches.map(m => {
     const played = m.score && m.score.ft;
-    const timeStr = m.time ? m.time.replace(/\s*UTC.*/,'') : '';
+    const timeStr = toColombiaTime(m.time);
     const group = (m.group || m.round || '').replace('Group ','Grupo ');
     const canPredict = !!(DATA.elo[m.team1] && DATA.elo[m.team2]);
     const clickAttr = canPredict ? `onclick="pickMatch('${m.team1.replace(/'/g,"\\'")}','${m.team2.replace(/'/g,"\\'")}',this)"` : '';
