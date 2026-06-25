@@ -4,6 +4,16 @@ const path = require('path');
 const WC_JSON_URL =
   'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
 
+// Nombres que openfootball usa diferente al DATA del predictor
+const TEAM_ALIASES = {
+  'USA': 'United States',
+  'Bosnia & Herzegovina': 'Bosnia-Herzegovina',
+};
+
+function normalizeTeam(name) {
+  return TEAM_ALIASES[name] || name;
+}
+
 // Extrae el objeto DATA del index.html (fuente única de verdad)
 let _cache = null;
 function getAppData() {
@@ -117,7 +127,7 @@ module.exports = async (req, res) => {
     const todayMatches = (wcData.matches || []).filter(m => m.date === date);
 
     const partidos = todayMatches.map(m => {
-      const pred = calcPrediction(DATA, m.team1, m.team2);
+      const pred = calcPrediction(DATA, normalizeTeam(m.team1), normalizeTeam(m.team2));
       const result = {
         local: m.team1,
         visitante: m.team2,
