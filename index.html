@@ -127,7 +127,7 @@
   .today-m26 { background: linear-gradient(135deg, var(--red), var(--orange)); color: #fff; border-radius: 20px; padding: 3px 10px; font-size: 0.72rem; font-weight: 800; letter-spacing: 0.3px; flex-shrink: 0; }
   .today-header-title { font-size: 0.95rem; font-weight: 700; color: var(--navy); }
   .today-date-badge { font-size: 0.78rem; color: var(--muted); margin-left: auto; white-space: nowrap; }
-  .today-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; justify-content: center; }
+  .today-scroll { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 6px; }
   .today-scroll::-webkit-scrollbar { height: 3px; }
   .today-scroll::-webkit-scrollbar-thumb { background: linear-gradient(to right, var(--red), var(--orange)); border-radius: 2px; }
   .today-card { background: #fff; border-radius: 16px; padding: 16px; min-width: 168px; flex-shrink: 0; transition: box-shadow 0.15s, transform 0.1s, border-color 0.15s; box-shadow: 0 1px 4px rgba(17,24,63,0.08); border: 1.5px solid transparent; }
@@ -472,6 +472,15 @@ async function loadTodayMatches() {
   }
 }
 
+const TEAM_NAME_MAP = {
+  'USA':'United States','Czechia':'Czech Republic','Korea Republic':'South Korea',
+  'IR Iran':'Iran',"Côte d'Ivoire":'Ivory Coast',"Cote d'Ivoire":'Ivory Coast',
+  'Cape Verde Islands':'Cape Verde','Trinidad & Tobago':'Trinidad and Tobago',
+  'Bosnia-Herzegovina':'Bosnia and Herzegovina','North Macedonia':'North Macedonia',
+  'Chinese Taipei':'Taiwan','Kyrgyz Republic':'Kyrgyzstan',
+};
+function normTeam(n) { return TEAM_NAME_MAP[n] || n; }
+
 const TEAM_COLORS = {
   'Mexico':'#15B8A6','Brazil':'#22c55e','Argentina':'#74b9ff','France':'#1E9BD7',
   'Germany':'#64748b','Spain':'#E11D6B','Portugal':'#e11d48','England':'#1d4ed8',
@@ -531,8 +540,9 @@ function renderTodayCards(matches) {
     const played = m.score && m.score.ft;
     const timeStr = toColombiaTime(m.time);
     const group = (m.group || m.round || '').replace('Group ','Grupo ');
-    const canPredict = !!(DATA.elo[m.team1] && DATA.elo[m.team2]);
-    const clickAttr = canPredict ? `onclick="pickMatch('${m.team1.replace(/'/g,"\\'")}','${m.team2.replace(/'/g,"\\'")}',this)"` : '';
+    const t1 = normTeam(m.team1), t2 = normTeam(m.team2);
+    const canPredict = !!(DATA.elo[t1] && DATA.elo[t2]);
+    const clickAttr = canPredict ? `onclick="pickMatch('${t1.replace(/'/g,"\\'")  }','${t2.replace(/'/g,"\\'")  }',this)"` : '';
     const ab1 = teamAbbrev(m.team1), ab2 = teamAbbrev(m.team2);
     const c1 = teamColor(m.team1), c2 = teamColor(m.team2);
     const midHTML = played
