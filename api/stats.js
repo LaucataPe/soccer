@@ -5,9 +5,20 @@ const WC_JSON_URL =
   'https://raw.githubusercontent.com/openfootball/worldcup.json/master/2026/worldcup.json';
 
 // Nombres que openfootball usa diferente al DATA del predictor
+// (debe coincidir con TEAM_NAME_MAP del frontend en index.html)
 const TEAM_ALIASES = {
   'USA': 'United States',
-  'Bosnia & Herzegovina': 'Bosnia-Herzegovina',
+  'Czechia': 'Czech Republic',
+  'Korea Republic': 'South Korea',
+  'IR Iran': 'Iran',
+  "Côte d'Ivoire": 'Ivory Coast',
+  "Cote d'Ivoire": 'Ivory Coast',
+  'Cape Verde Islands': 'Cape Verde',
+  'Trinidad & Tobago': 'Trinidad and Tobago',
+  'Bosnia-Herzegovina': 'Bosnia and Herzegovina',
+  'Bosnia & Herzegovina': 'Bosnia and Herzegovina',
+  'Chinese Taipei': 'Taiwan',
+  'Kyrgyz Republic': 'Kyrgyzstan',
 };
 
 function normalizeTeam(name) {
